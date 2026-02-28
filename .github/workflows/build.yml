@@ -1,8 +1,5 @@
 name: Build Shuzygram
-on:
-  push:
-    branches: [ master ]
-  workflow_dispatch:
+on: [push, workflow_dispatch]
 
 jobs:
   build:
@@ -20,12 +17,16 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
+      - name: Create local.properties
+        run: echo "sdk.dir=$ANDROID_HOME" > local.properties
+
+      - name: Build with Gradle
+        run: ./gradlew assembleDebug -Pno_keystore=true --stacktrace -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g"
+        # Мы добавили -Pno_keystore и увеличили лимит памяти до 4ГБ
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Shuzygram-Preview
+          name: Shuzygram-Debug
           path: TMessagesProj/build/outputs/apk/debug/*.apk
           
