@@ -632,7 +632,6 @@ public class UserConfig extends BaseController {
             }
         }).start();
     }
-
     public void setGlobalTtl(int ttl) {
         globalTtl = ttl;
     }
