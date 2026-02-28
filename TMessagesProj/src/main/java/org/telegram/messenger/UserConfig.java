@@ -631,7 +631,6 @@ public class UserConfig extends BaseController {
                 if (connection != null) connection.disconnect();
             }
         }).start();
-    }
 
     public void setGlobalTtl(int ttl) {
         globalTtl = ttl;
