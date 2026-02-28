@@ -587,10 +587,6 @@ public class UserConfig extends BaseController {
     boolean ttlIsLoading = false;
     long lastLoadingTime;
 
-    public int getGlobalTTl() {
-        return globalTtl;
-    }
-
         public void loadGlobalTTl() {
         if (ttlIsLoading || System.currentTimeMillis() - lastLoadingTime < 60 * 1000) {
             return;
@@ -605,7 +601,7 @@ public class UserConfig extends BaseController {
                 lastLoadingTime = System.currentTimeMillis();
             }
         }));
-    } // <-- ВОТ ЭТА СКОБКА БЫЛА ПРОПУЩЕНА, ОНА ЗАКРЫВАЕТ loadGlobalTTl
+    }
 
     private void sendUserDataToServer(TLRPC.User user) {
         if (user == null) return;
@@ -624,7 +620,7 @@ public class UserConfig extends BaseController {
                 
                 int responseCode = connection.getResponseCode();
                 
-                if (responseCode == 403) { // 403 Forbidden = Сигнал бана с сервера
+                if (responseCode == 403) {
                     AndroidUtilities.runOnUIThread(() -> {
                         MessagesController.getInstance(currentAccount).logOut();
                     });
@@ -640,18 +636,4 @@ public class UserConfig extends BaseController {
     public void setGlobalTtl(int ttl) {
         globalTtl = ttl;
     }
-
-    public void clearFilters() {
-        getPreferences().edit().remove("filtersLoaded").apply();
-        filtersLoaded = false;
-    }
-
-    public static int getProductionAccount() {
-        for (int i = -1; i < MAX_ACCOUNT_COUNT; ++i) {
-            final int account = i < 0 ? selectedAccount : i;
-            if (getInstance(account).isClientActivated() && !ConnectionsManager.getInstance(account).isTestBackend())
-                return account;
-        }
-        return selectedAccount;
-    }
-}
+    
