@@ -18,10 +18,9 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug -Pno_keystore=true --stacktrace
+        run: ./gradlew clean assembleDebug -Pno_keystore=true --stacktrace
         env:
           _JAVA_OPTIONS: "-Xmx4g -XX:MaxMetaspaceSize=1g"
-          # Это даст билду больше "воздуха" (4ГБ оперативки)
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
